@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кіру - A|B тағам жеткізу</title>
+    <!-- MONTSERRAT ҚАРІПІН ЖҮКТЕУ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #f7f9fb; }
+        .logo-placeholder { background-color: #2563EB; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 8px; }
+        .flash-message { opacity: 1; transition: opacity 0.5s ease-out; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+<!-- NAVIGATSIYALЫҚ ТАҚТА (Артқа қайту үшін) -->
+<nav class="bg-white p-4 text-black shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-10">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+        <a href="{{ url_for('index') }}" class="flex items-center">
+            <div class="logo-placeholder">A|B</div>
+        </a>
+        <div class="flex space-x-6 items-center">
+            <a href="{{ url_for('signup') }}" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-150 shadow-md font-medium">Тіркелу</a>
+        </div>
+    </div>
+</nav>
+
+
+<div class="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl mt-20">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">Жүйеге Кіру</h1>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-container" class="fixed top-4 right-4 z-50 space-y-2">
+            {% for category, message in messages %}
+                <div class="flash-message p-3 text-sm font-medium text-white 
+                {% if category == 'error' or ('қате' in message|lower) %}
+                    bg-red-600
+                {% else %}
+                    bg-green-600
+                {% endif %}
+                rounded-lg shadow-lg">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- 🛑 ӘКІМШІ БЛОГЫН ЖОЙДЫҚ (Тек қарапайым кіру қалды) -->
+    
+    <!-- ҚАРАПАЙЫМ КІРУ ФОРМАСЫ -->
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="mb-4">
+            <label for="username_or_email" class="block text-gray-700 text-sm font-semibold mb-2">Қолданушы аты немесе Email:</label>
+            <input type="text" id="username_or_email" name="username_or_email" required
+                   class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div class="mb-6">
+            <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Құпия сөз:</label>
+            <input type="password" id="password" name="password" required
+                   class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div class="flex items-center justify-between">
+            <button type="submit"
+                    class="bg-blue-600 text-white w-full py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-150 shadow-md">
+                Кіру
+            </button>
+        </div>
+    </form>
+
+    <p class="text-center text-gray-600 text-sm mt-6">
+        Аккаунтыңыз жоқ па? 
+        <a href="{{ url_for('signup') }}" class="text-blue-600 font-semibold hover:text-blue-800 transition duration-150">Тіркелу</a>
+    </p>
+</div>
+
+<script>
+    // Flash хабарламаларды автоматты жабу
+    document.addEventListener('DOMContentLoaded', function() {
+        const messages = document.querySelectorAll('.flash-message');
+        messages.forEach(function(message) {
+            setTimeout(function() {
+                message.style.opacity = '0';
+            }, 4000); 
+
+            setTimeout(function() {
+                message.remove();
+            }, 4500); 
+        });
+    });
+</script>
+
+</body>
+</html>

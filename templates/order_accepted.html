@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тапсырыс сәтті қабылданды</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #f7f9fb; }
+        .logo-placeholder { background-color: #2563EB; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<!-- NAVIGATSIYALЫҚ ТАҚТА (index.html-дағыдай) -->
+<nav class="bg-white p-4 text-black shadow-sm border-b border-gray-200">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+        
+        <a href="{{ url_for('index') }}" class="flex items-center">
+            <div class="logo-placeholder">A|B</div>
+        </a>
+        
+        <div class="flex space-x-6 items-center">
+            <a href="{{ url_for('index') }}" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Басты бет</a>
+            <a href="{{ url_for('support') }}" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Қолдау</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Жеке кабинет</a>
+            {% endif %}
+        </div>
+
+        <div class="flex space-x-3 items-center">
+            {% if current_user.is_authenticated %}
+                <span class="text-base font-semibold text-gray-800">
+                    Сәлем, {{ current_user.username }}!
+                </span>
+                <a href="{{ url_for('logout') }}" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150 shadow-md font-medium">Шығу</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="px-5 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition duration-150 font-medium">Кіру</a>
+                <a href="{{ url_for('signup') }}" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-150 shadow-md font-medium">Тіркелу</a>
+            {% endif %}
+        </div>
+        
+    </div>
+</nav>
+
+<main class="container mx-auto px-4 py-20">
+    <div class="max-w-xl mx-auto bg-white p-10 rounded-xl shadow-2xl text-center border-t-8 border-green-500">
+        
+        <!-- Иконка -->
+        <svg class="w-20 h-20 text-green-500 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Тапсырыс қабылданды!</h1>
+        <p class="text-lg text-gray-600 mb-6">Сіздің тапсырысыңыз сәтті тіркелді. Біз сізге хабарласамыз.</p>
+        
+        <div class="bg-gray-50 p-6 rounded-lg mb-6 text-left">
+            <p class="text-base font-semibold text-gray-700 mb-2">
+                Тапсырыс №: <span class="float-right text-gray-900 font-bold">{{ order.id }}</span>
+            </p>
+            <p class="text-base font-semibold text-gray-700 mb-2">
+                Жеткізу мекенжайы: <span class="float-right text-gray-900">{{ order.delivery_address }}</span>
+            </p>
+            <p class="text-base font-semibold text-gray-700">
+                Жалпы сома: <span class="float-right text-green-600 font-bold text-xl">{{ "{:,.0f}".format(order.total_price) }} ₸</span>
+            </p>
+            <p class="text-xs text-gray-500 mt-2">
+                Төлем түрі: {{ order.payment_method }}
+            </p>
+        </div>
+        
+        <a href="{{ url_for('dashboard') }}" class="w-full inline-block bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition duration-150 shadow-md">
+            Тапсырыс мәліметтерін көру
+        </a>
+    </div>
+</main>
+
+</body>
+</html>

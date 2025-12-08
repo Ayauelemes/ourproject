@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тапсырысты Растау - A|B</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+     
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .logo-placeholder {
+            background-color: #2563EB;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        /* Flash messages стилі */
+        .flash-message {
+            opacity: 1;
+            transition: opacity 0.5s ease-out; 
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+
+    <!-- Навигация -->
+    <nav class="bg-white p-4 text-black shadow-sm border-b border-gray-200">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+
+            <a href="{{ url_for('index') }}" class="flex items-center">
+                <div class="logo-placeholder">A|B</div>
+            </a>
+
+            <div class="flex space-x-6 items-center">
+                <a href="{{ url_for('index') }}"
+                    class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">
+                    Басты бет
+                </a>
+
+                {% if current_user and current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}"
+                    class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">
+                    Жеке кабинет
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="flex space-x-3 items-center">
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div id="flash-container" class="fixed top-4 right-4 z-50 space-y-2">
+                    {% for category, message in messages %}
+                    <div class="flash-message p-3 text-sm font-medium text-white 
+                        {% if category == 'error' or ('қате' in message|lower) %}
+                            bg-red-600
+                        {% else %}
+                            bg-green-600
+                        {% endif %}
+                        rounded-lg shadow-lg">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                {% if current_user and current_user.is_authenticated %}
+                <span class="text-base font-semibold text-gray-800">
+                    Сәлем, {{ current_user.username }}!
+                </span>
+                <a href="{{ url_for('logout') }}"
+                    class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150 shadow-md font-medium">
+                    Шығу
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}"
+                    class="px-5 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition duration-150 font-medium">
+                    Кіру
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-8">Тапсырысты растау</h1>
+
+        {% if cart_items %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Себет -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg h-fit">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Тапсырыс мазмұны</h2>
+
+                {% for item in cart_items %}
+                <div class="flex justify-between items-center py-3 border-b last:border-b-0">
+                    
+                    <!-- Сол жақ: Атауы және саны -->
+                    <div class="flex flex-col">
+                        <span class="text-lg font-medium text-gray-800">{{ item.name }}</span>
+                        <span class="text-sm text-gray-500">{{ item.price | int }} ₸ × {{ item.quantity }}</span>
+                    </div>
+
+                    <!-- Оң жақ: Бағасы және Жою батырмасы -->
+                    <div class="flex items-center space-x-4">
+                        <span class="text-lg font-bold text-gray-900">
+                            {{ (item.price * item.quantity) | int }} ₸
+                        </span>
+                        
+                        <!-- 🛑 ЖОЮ ФОРМАСЫ -->
+                        <form method="POST" action="{{ url_for('remove_from_cart', item_id=item.id) }}" class="inline-block m-0 p-0">
+                            <button type="submit" class="text-red-500 hover:text-red-700 transition duration-150 p-1 rounded-full hover:bg-red-100 focus:outline-none" title="Себеттен жою">
+                                <!-- Trash Icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="mt-6 pt-4 border-t-2 border-gray-200 flex justify-between items-center">
+                    <span class="text-xl font-bold text-gray-900">Жалпы:</span>
+                    <span class="text-2xl font-extrabold text-green-600">
+                        {{ total_price | int }} ₸
+                    </span>
+                </div>
+            </div>
+
+            <!-- Жеткізу формасы -->
+            <div class="lg:col-span-1">
+                <form method="POST" action="{{ url_for('checkout') }}"
+                    class="bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2">Жеткізу ақпараты</h2>
+
+                    <div class="mb-4">
+                        <label for="delivery_address"
+                            class="block text-sm font-medium text-gray-700 mb-2">Жеткізу мекенжайы</label>
+                        <input type="text" id="delivery_address" name="delivery_address" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Қала, көше, үй нөмірі">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Төлем түрі:</label>
+                        <div class="flex space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="payment_method" value="Картамен" required class="form-radio text-blue-600 h-4 w-4">
+                                <span class="ml-2 text-gray-700">Картамен</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="payment_method" value="Қолма-қол" required class="form-radio text-green-600 h-4 w-4">
+                                <span class="ml-2 text-gray-700">Қолма-қол</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Қосымша ақпарат блогы -->
+                    <div class="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="flex justify-between font-normal text-gray-700">
+                            <span>Тауарлар сомасы:</span>
+                            <span class="font-medium">{{ "{:,.0f}".format(initial_price) }} ₸</span>
+                        </div>
+
+                        <div class="flex justify-between font-normal text-gray-700">
+                            <span>Қызмет көрсету ақысы (6%):</span>
+                            <span class="font-medium">{{ "{:,.0f}".format(service_fee) }} ₸</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between text-2xl font-bold mt-4 pt-4 border-t border-gray-400">
+                        <span>Жалпы:</span>
+                        <span class="text-green-600">{{ "{:,.0f}".format(total_price) }} ₸</span>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-blue-600 text-white text-lg font-semibold py-3 rounded-xl hover:bg-blue-700 transition duration-150 shadow-lg mt-4">
+                        Тапсырысты растау ({{ total_price | int }} ₸)
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="text-center p-10 bg-white rounded-xl shadow-lg">
+            <p class="text-xl text-gray-600">
+                Себет бос.
+                <a href="{{ url_for('index') }}" class="text-blue-600 font-medium hover:underline">Мәзірге оралу</a>
+            </p>
+        </div>
+        {% endif %}
+    </main>
+    
+    <!-- JavaScript: Flash хабарламаларды жабу -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.flash-message');
+            
+            messages.forEach(function(message) {
+                // 1. 4 секундтан кейін мөлдірлікті (opacity) 0-ге өзгерту
+                setTimeout(function() {
+                    message.style.opacity = '0';
+                }, 4000); 
+
+                // 2. 4.5 секундтан кейін элементті DOM-нан толығымен жою
+                setTimeout(function() {
+                    message.remove();
+                }, 4500); 
+            });
+        });
+    </script>
+
+</body>
+</html>

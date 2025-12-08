@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Төлем - Тапсырыс №{{ order.id }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"> 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #f7f9fb; }
+        .logo-placeholder { background-color: #2563EB; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 8px; }
+        .flash-message { opacity: 1; transition: opacity 0.5s ease-out; }
+        /* Сандық енгізу өрістеріндегі стрелкаларды жасыру */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+        /* Radio button стилін жақсарту (Жаңа стиль) */
+        .form-radio {
+            appearance: none;
+            border-radius: 50%;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #D1D5DB;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .form-radio:checked {
+            border: 5px solid;
+            background-color: white;
+        }
+        .form-radio.text-red-600:checked { border-color: #DC2626; color: #DC2626; }
+        .form-radio.text-blue-600:checked { border-color: #2563EB; color: #2563EB; }
+        .form-radio.text-gray-600:checked { border-color: #4B5563; color: #4B5563; }
+        
+        /* Бұрынғы формадағы инпут стилін жаңарту, себебі бұлар енді қажет емес */
+        .old-form-input { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVIGATSIYALЫҚ ТАҚТА (index.html-дағыдай) -->
+<nav class="bg-white p-4 text-black shadow-sm border-b border-gray-200">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+        
+        <a href="{{ url_for('index') }}" class="flex items-center">
+            <div class="logo-placeholder">A|B</div>
+        </a>
+        
+        <div class="flex space-x-6 items-center">
+            <a href="{{ url_for('index') }}" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Басты бет</a>
+            <a href="{{ url_for('support') }}" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Қолдау</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Жеке кабинет</a>
+            {% endif %}
+        </div>
+
+        <div class="flex space-x-3 items-center">
+            {% if current_user.is_authenticated %}
+                <span class="text-base font-semibold text-gray-800">
+                    Сәлем, {{ current_user.username }}!
+                </span>
+                <a href="{{ url_for('logout') }}" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150 shadow-md font-medium">Шығу</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="px-5 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition duration-150 font-medium">Кіру</a>
+                <a href="{{ url_for('signup') }}" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-150 shadow-md font-medium">Тіркелу</a>
+            {% endif %}
+        </div>
+        
+    </div>
+</nav>
+
+<main class="container mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Төлем беті (Тапсырыс №{{ order.id }})</h1>
+    
+    <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container" class="mb-4 space-y-2">
+                {% for category, message in messages %}
+                    <div class="flash-message p-3 text-sm font-medium text-white 
+                    {% if category == 'error' or ('қате' in message|lower) %}
+                        bg-red-600
+                    {% else %}
+                        bg-green-600
+                    {% endif %}
+                    rounded-lg shadow-lg">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <h2 class="text-xl font-semibold mb-6 text-center">Төленетін сома: <span class="text-green-600">{{ "{:,.0f}".format(order.total_price) }} ₸</span></h2>
+        
+        <form method="POST" action="{{ url_for('payment', order_id=order.id) }}">
+            
+            <!-- 🛑 Банкті таңдау блогы -->
+            <div class="mb-6 border p-4 rounded-lg bg-gray-50 shadow-inner">
+                <label class="block text-gray-700 font-bold mb-4 text-lg border-b pb-2">Банкті таңдаңыз:</label>
+                <div class="flex flex-col space-y-4">
+                    <label class="inline-flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition duration-150 border border-transparent hover:border-red-400 shadow-sm">
+                        <input type="radio" name="bank_name" value="Kaspi Bank" required class="form-radio text-red-600 h-5 w-5">
+                        <span class="ml-3 text-lg font-semibold text-red-600">Kaspi Bank</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition duration-150 border border-transparent hover:border-blue-400 shadow-sm">
+                        <input type="radio" name="bank_name" value="Halyk Bank" required class="form-radio text-blue-600 h-5 w-5">
+                        <span class="ml-3 text-lg font-semibold text-blue-600">Halyk Bank</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition duration-150 border border-transparent hover:border-gray-400 shadow-sm">
+                        <input type="radio" name="bank_name" value="Other" required class="form-radio text-gray-600 h-5 w-5">
+                        <span class="ml-3 text-lg text-gray-700">Басқа карта (Visa/Mastercard)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 🛑 Карта нөмірі -->
+            <div class="mb-4">
+                <label for="card_number" class="block text-gray-700 font-medium mb-2">Карта нөмірі (16 сан):</label>
+                <input type="number" id="card_number" name="card_number" required maxlength="16" pattern="\d{16}" title="16 саннан тұратын карта нөмірін енгізіңіз" placeholder="XXXX XXXX XXXX XXXX" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner">
+            </div>
+
+            <div class="flex space-x-4 mb-4">
+                <!-- 🛑 Мерзімі -->
+                <div class="w-1/2">
+                    <label for="expiry" class="block text-gray-700 font-medium mb-2">Мерзімі (АА/ЖЖ):</label>
+                    <input type="text" id="expiry" name="expiry" required maxlength="5" pattern="(0[1-9]|1[0-2])\/\d{2}" title="Мерзімді MM/YY форматында енгізіңіз (мысалы, 01/25)" placeholder="01/25" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner">
+                </div>
+                <!-- 🛑 CVC -->
+                <div class="w-1/2">
+                    <label for="cvc" class="block text-gray-700 font-medium mb-2">CVC/CVV (3 сан):</label>
+                    <input type="number" id="cvc" name="cvc" required maxlength="3" pattern="\d{3}" title="Үш саннан тұратын CVC/CVV кодын енгізіңіз" placeholder="123" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner"
+                    oninput="if(this.value.length>this.maxLength) this.value=this.value.slice(0,this.maxLength);" pattern="[0-9]{3}">
+                </div>
+            </div>
+            
+            <!-- 🛑 Карта иесінің аты -->
+            <div class="mb-6">
+                <label for="card_holder" class="block text-gray-700 font-medium mb-2">Карта иесінің аты-жөні (LATIN):</label>
+                <input type="text" id="card_holder" name="card_holder" required placeholder="JOHN DOE"
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner uppercase">
+            </div>
+            
+            <p class="text-sm text-center text-gray-500 mb-4">
+                Төлем қауіпсіздігін қамтамасыз ету үшін деректерді тексеру имитацияланады.
+            </p>
+
+            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 transition duration-150 shadow-md transform hover:scale-[1.01] active:scale-[0.99]">
+                {{ "{:,.0f}".format(order.total_price) }} ₸ төлеуді растау
+            </button>
+        </form>
+    </div>
+</main>
+<script>
+    // Flash хабарламаларды автоматты жабу
+    document.addEventListener('DOMContentLoaded', function() {
+        const messages = document.querySelectorAll('.flash-message');
+        
+        messages.forEach(function(message) {
+            setTimeout(function() {
+                message.style.opacity = '0';
+            }, 4000); 
+
+            setTimeout(function() {
+                message.remove();
+            }, 4500); 
+        });
+    });
+
+    // CVC өрісінде 3 саннан кейін енгізуді тоқтату
+    document.getElementById('cvc').addEventListener('input', function(e) {
+        if (e.target.value.length > 3) {
+            e.target.value = e.target.value.slice(0, 3);
+        }
+    });
+
+    // Карта нөмірі өрісінде 16 саннан кейін енгізуді тоқтату
+    document.getElementById('card_number').addEventListener('input', function(e) {
+        if (e.target.value.length > 16) {
+            e.target.value = e.target.value.slice(0, 16);
+        }
+    });
+</script>
+
+</body>
+</html>

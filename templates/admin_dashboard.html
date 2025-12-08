@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Әкімші Панелі</title>
+    <!-- MONTSERRAT ҚАРІПІН ЖҮКТЕУ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #f7f9fb; }
+        .logo-placeholder { 
+            background-color: #2563EB; 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            font-weight: bold; 
+            border-radius: 8px; 
+        }
+        .flash-message { opacity: 1; transition: opacity 0.5s ease-out; }
+        .break-words { word-break: break-word; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- NAVIGATSIYALЫҚ ТАҚТА (Әкімші режимі) -->
+<nav class="bg-white p-4 text-black shadow-sm border-b border-gray-200">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+        <a href="{{ url_for('index') }}" class="flex items-center">
+            <!-- 🛑 Логотипті A|B деп өзгерттік -->
+            <div class="logo-placeholder bg-red-600">A|B</div>
+            <span class="ml-3 text-xl font-bold text-red-600">Әкімші Панелі</span>
+        </a>
+        
+        <div class="flex space-x-3 items-center">
+            <span class="text-base font-semibold text-gray-800">
+                Сәлем, Әкімші {{ current_user.username }}!
+            </span>
+            <a href="{{ url_for('logout') }}" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150 shadow-md font-medium">Шығу</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-extrabold text-gray-900 mb-6">Барлық Тапсырыстар</h1>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-container" class="fixed top-4 right-4 z-50 space-y-2">
+            {% for category, message in messages %}
+                <div class="flash-message p-3 text-sm font-medium text-white 
+                {% if category == 'error' or ('қате' in message|lower) %}
+                    bg-red-600
+                {% else %}
+                    bg-green-600
+                {% endif %}
+                rounded-lg shadow-lg">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% if orders %}
+        <div class="bg-white shadow-xl rounded-xl overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Уақыты</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Қолданушы</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Жалпы Сома</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Төлем</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Мекенжай</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тауарлар</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Әрекет</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for order in orders %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.id }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.customer.username }} <span class="text-xs text-gray-400">(ID: {{ order.user_id }})</span></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">{{ "{:,.0f}".format(order.total_price) }} ₸</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.payment_method }}</td>
+                        <td class="px-6 py-4 whitespace-normal text-sm text-gray-700 max-w-xs break-words">{{ order.delivery_address }}</td>
+                        <td class="px-6 py-4 whitespace-normal text-sm text-gray-700 max-w-xs break-words">
+                            <ul class="list-disc list-inside">
+                                {% for item in order.items %}
+                                    <li class="mb-1 text-xs">{{ item.item_name }} ({{ item.quantity }} дана)</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        
+                        <!-- Статусты өзгерту формасы -->
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <form method="POST" action="{{ url_for('admin_update_order', order_id=order.id) }}" class="flex flex-col space-y-2">
+                                <select name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border shadow-sm">
+                                    {% for status in statuses %}
+                                        <option value="{{ status }}" {% if order.order_status == status %}selected{% endif %}>
+                                            {{ status }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button type="submit" class="bg-blue-500 text-white px-3 py-1 text-xs rounded-md hover:bg-blue-600 transition duration-150">
+                                Жаңарту
+                            </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="p-8 bg-white rounded-xl shadow-lg text-center">
+            <p class="text-xl text-gray-600">Әлі тапсырыстар түскен жоқ.</p>
+        </div>
+    {% endif %}
+</main>
+<script>
+    // Flash хабарламаларды автоматты жабу
+    document.addEventListener('DOMContentLoaded', function() {
+        const messages = document.querySelectorAll('.flash-message');
+        messages.forEach(function(message) {
+            setTimeout(function() {
+                message.style.opacity = '0';
+            }, 4000); 
+
+            setTimeout(function() {
+                message.remove();
+            }, 4500); 
+        });
+    });
+</script>
+</body>
+</html>
