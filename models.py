@@ -2,7 +2,7 @@ from extentions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship 
-from sqlalchemy import func, UniqueConstraint, event 
+from sqlalchemy import func, UniqueConstraint, event, PrimaryKeyConstraint 
 
 # 🛑 МӘЗІР ТІЗІМІ: Енді бұл тізім models.py-да тұрады және app.py-да қолданылады.
 FOOD_ITEMS = [
@@ -97,6 +97,9 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     
     orders = relationship('UserOrder', backref='customer', lazy='dynamic') 
+    # 🛑 Many:Many қатынасы үшін байланыс
+    favorite_items = relationship('FavoriteItem', backref='user', lazy='dynamic', cascade="all, delete-orphan")
+
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
@@ -106,6 +109,24 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+# 🛑 ЖАҢА АРАЛЫҚ КЕСТЕ: Many:Many (User ↔ FoodItem)
+# Бұл кесте тек пайдаланушының сүйікті тағамдарының ID-терін сақтайды.
+class FavoriteItem(db.Model):
+    __tablename__ = 'favorite_items'
+    
+    # Біріккен бастапқы кілт - екі кілттің қосындысы
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # food_item_id - FoodItem кестесі жоқ болғандықтан, тек ID-ні сақтаймыз
+    food_item_id = db.Column(db.Integer, nullable=False) 
+    
+    __table_args__ = (
+        PrimaryKeyConstraint('user_id', 'food_item_id', name='pk_favorite_items'),
+    )
+
+    def __repr__(self):
+        return f'<FavoriteItem User:{self.user_id} | Food:{self.food_item_id}>'
+
 
 # 1-ші КЕСТЕ: Тапсырыстың Жалпы Кестесі
 class UserOrder(db.Model):
