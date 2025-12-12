@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Қолдау Қызметі - AI Chat</title>
-    <!-- Montserrat қаріпін жүктеу -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
@@ -19,7 +18,7 @@
 </head>
 <body>
 
-<!-- NAVIGATSIYALЫҚ ТАҚТА -->
+
 <nav class="bg-white p-4 text-black shadow-sm border-b border-gray-200">
     <div class="container mx-auto px-4 flex justify-between items-center">
         
@@ -54,9 +53,9 @@
     
     <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
         
-        <!-- Чат терезесі -->
+        
         <div id="chat-window" class="p-4 space-y-4">
-            <!-- Сәлемдесу хабарламасы -->
+            
             <div class="flex justify-start">
                 <div class="ai-message p-3 rounded-xl max-w-xs md:max-w-md">
                     <p class="font-bold">A|B Support AI:</p>
@@ -65,7 +64,7 @@
             </div>
         </div>
 
-        <!-- Жүктеу индикаторы -->
+        
         <div id="loading" class="text-center p-3 hidden">
             <div class="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] text-blue-600 motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
                 <span class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
@@ -73,7 +72,7 @@
             <span class="ml-2 text-gray-600">Жауап дайындалуда...</span>
         </div>
 
-        <!-- Сұрау формасы -->
+        
         <div class="p-4 border-t border-gray-200">
             <form id="chat-form" class="flex space-x-3">
                 <input type="text" id="user-input" placeholder="Сұрағыңызды енгізіңіз..." required 
@@ -95,12 +94,12 @@
     const loadingIndicator = document.getElementById('loading');
     const sendButton = document.getElementById('send-button');
 
-    // Чат терезесін ең соңына жылжыту
+    
     function scrollToBottom() {
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
-    // Хабарламаны чатқа қосу
+    
     function appendMessage(text, isUser = false) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
@@ -119,22 +118,22 @@
         scrollToBottom();
     }
 
-    // Сұрауды өңдеу
+    
     chatForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const query = userInput.value.trim();
         if (!query) return;
 
-        // 1. Пайдаланушы хабарламасын көрсету
+        
         appendMessage(query, true);
-        userInput.value = ''; // Input-ты тазалау
+        userInput.value = ''; 
 
-        // 2. Жүктеу индикаторын көрсету
+        
         loadingIndicator.classList.remove('hidden');
         sendButton.disabled = true;
 
         try {
-            // 3. Flask API-ға сұрау жіберу
+            
             const response = await fetch('{{ url_for("api_chat") }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -143,7 +142,7 @@
 
             const data = await response.json();
             
-            // 4. Жауапты көрсету
+            
             if (response.ok) {
                 appendMessage(data.response, false);
             } else {
@@ -154,14 +153,14 @@
             console.error('Fetch error:', error);
             appendMessage("Желі қатесі немесе сервер жауап бермеді.", false);
         } finally {
-            // 5. Жүктеуді тоқтату
+            
             loadingIndicator.classList.add('hidden');
             sendButton.disabled = false;
             scrollToBottom();
         }
     });
 
-    scrollToBottom(); // Бет жүктелгенде төмен жылжыту
+    scrollToBottom(); 
 </script>
 
 </body>

@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="kk">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>A|B тағам жеткізу</title>
-<!-- MONTSERRAT ҚАРІПІН ЖҮКТЕУ -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -17,14 +15,14 @@
             opacity: 1;
             transition: opacity 0.5s ease-out; 
         }
-        /* Жаңа фото-карточкаларға арналған стиль */
+
         .photo-card {
             background-size: cover;
             background-position: center;
             height: 250px;
             position: relative;
             overflow: hidden;
-            border-radius: 1rem; /* rounded-xl */
+            border-radius: 1rem; 
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
         }
@@ -58,7 +56,7 @@
         <div class="flex space-x-6 items-center">
             <a href="{{ url_for('index') }}" class="text-base font-medium text-blue-600 transition duration-150">Басты бет</a>
             <a href="{{ url_for('support') }}" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Қолдау</a>
-            <a href="{{ url_for('index') }}" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Біз туралы</a>
+            <a href="#footer-anchor" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Біз туралы</a>
 
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('dashboard') }}" class="text-base font-medium text-gray-800 hover:text-blue-600 transition duration-150">Жеке Кабинет</a>
@@ -67,7 +65,6 @@
 
         <div class="flex space-x-3 items-center">
             
-            <!-- Flash Messages -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     <div id="flash-container" class="fixed top-4 right-4 z-50 space-y-2">
@@ -86,7 +83,6 @@
                 {% endif %}
             {% endwith %}
 
-            <!-- Себет түймесі -->
             {% if current_user.is_authenticated %}
                 {% set cart_count = session.get('cart') | length if session.get('cart') else 0 %}
                 <a href="{{ url_for('checkout') }}" class="relative px-3 py-2 text-gray-700 hover:text-blue-600 transition duration-150">
@@ -98,7 +94,6 @@
             {% endif %}
 
 
-            <!-- Кіру/Шығу логикасы -->
             {% if current_user.is_authenticated %}
                 <span class="text-base font-semibold text-gray-800">
                     Сәлем, {{ current_user.username }}!
@@ -115,10 +110,8 @@
 
 <main class="container mx-auto px-4 py-12">
 
-    <!-- 🛑 ЖАҢА ФОТО-КАРТОЧКАЛАР СЕКЦИЯСЫ -->
     <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         
-        <!-- Пицца Карточкасы -->
         <a href="#Пицца" class="photo-card" style="background-image: url('{{ url_for('static', filename='images/card1.jpeg') }}')">
             <div class="overlay">
                 <h3 class="text-3xl font-bold mb-1">Пицца</h3>
@@ -126,7 +119,6 @@
             </div>
         </a>
         
-        <!-- Роллдар Карточкасы -->
         <a href="#Роллдар" class="photo-card" style="background-image: url('{{ url_for('static', filename='images/card2.jpeg') }}')">
             <div class="overlay">
                 <h3 class="text-3xl font-bold mb-1">Роллдар</h3>
@@ -134,7 +126,6 @@
             </div>
         </a>
 
-        <!-- Бургерлер Карточкасы -->
         <a href="#Бургерлер" class="photo-card" style="background-image: url('{{ url_for('static', filename='images/card3.jpeg') }}')">
             <div class="overlay">
                 <h3 class="text-3xl font-bold mb-1">Бургерлер</h3>
@@ -142,7 +133,7 @@
             </div>
         </a>
 
-        <!-- Салаттар Карточкасы -->
+
         <a href="#Салаттар" class="photo-card" style="background-image: url('{{ url_for('static', filename='images/card4.jpeg') }}')">
             <div class="overlay">
                 <h3 class="text-3xl font-bold mb-1">Салаттар</h3>
@@ -150,9 +141,8 @@
             </div>
         </a>
     </section>
-    <!-- 🛑 ФОТО-КАРТОЧКАЛАР СЕКЦИЯСЫ АЯҚТАЛДЫ -->
 
-    <!-- Жеткізу/Өзін алу секциясы (Бұл бөлік өзгеріссіз) -->
+
     <section class="mb-8 p-1 bg-gray-100 rounded-lg shadow-inner flex items-center"> 
         
         <div class="flex text-sm font-semibold rounded-lg overflow-hidden border border-gray-400">
@@ -166,7 +156,7 @@
         
     </section>
 
-    <!-- Сүзгілер секциясы (Бұл бөлік өзгеріссіз) -->
+
     <section class="mb-12"> 
     <div class="flex flex-wrap gap-3 justify-start">
         
@@ -186,7 +176,7 @@
     </div>
 </section>
     
-    <!-- ТАМАҚТАРДЫҢ ТІЗІМІН КӨРСЕТЕТІН СЕКЦИЯ (Бұл бөлік өзгеріссіз) -->
+
     <section>
         {% for category, items in categories.items() %}
             <h2 class="text-3xl font-bold text-gray-800 mb-6 mt-8" id="{{ category | replace(' ', '-') }}">{{ category }}</h2>
@@ -202,9 +192,7 @@
                             <p class="text-sm text-gray-500 mt-1 mb-3">{{ item.description }}</p>
                             
                             <div class="mt-auto flex justify-between items-center pt-3 border-t">
-                                <span class="text-xl font-bold text-gray-900">{{ "{:,.0f}".format(item.price) }} ₸</span>
-                                
-                                <!-- Себетке қосу формасы -->
+                                <span class="text-xl font-bold text-gray-900">{{ "{:,.0f}".format(item.price) }} ₸</span> 
                                 <form method="POST" action="{{ url_for('add_to_cart') }}">
                                     <input type="hidden" name="item_id" value="{{ item.id }}">
                                     <input type="hidden" name="quantity" value="1"> 
@@ -228,7 +216,7 @@
     
 </main>
 <script>
-    // Жеткізу түрін таңдау логикасы (тек UI үшін)
+   
     document.getElementById('btn-delivery').addEventListener('click', function() {
         document.getElementById('btn-delivery').classList.replace('bg-white', 'bg-gray-800');
         document.getElementById('btn-delivery').classList.replace('text-gray-800', 'text-white');
@@ -245,17 +233,17 @@
         document.getElementById('delivery-type-label').textContent = 'Қай мекемеден алып кетесіз?';
     });
     
-    // Flash хабарламаларды автоматты жабу
+    
     document.addEventListener('DOMContentLoaded', function() {
         const messages = document.querySelectorAll('.flash-message');
         
         messages.forEach(function(message) {
-            // 4 секундтан кейін мөлдірлікті (opacity) 0-ге өзгерту
+            
             setTimeout(function() {
                 message.style.opacity = '0';
             }, 4000); 
 
-            // 4.5 секундтан кейін элементті DOM-нан толығымен жою
+            
             setTimeout(function() {
                 message.remove();
             }, 4500); 
@@ -263,29 +251,28 @@
     });
 
 </script>
-    <footer class="bg-gray-800 text-white mt-12 py-10">
+    <footer id="footer-anchor" class="bg-gray-800 text-white mt-12 py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <!-- 1. Компания аты және авторлық құқық -->
                 <div>
                     <h3 class="text-2xl font-extrabold text-blue-400 mb-4">A|B тағам жеткізу</h3>
                     <p class="text-sm text-gray-400">© 2025 A|B</p>
                     <p class="text-sm text-gray-400 mt-2">Қазақстан, 010000, Астана қ.</p>
                 </div>
 
-                <!-- 2. Ақпарат -->
+               
                 <div>
                     <h4 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-1">Ақпарат</h4>
                     <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="{{ url_for('support') }}" class="hover:text-blue-400 transition duration-150">Біз туралы</a></li>
+                        <li><a href="#footer-anchor" class="hover:text-blue-400 transition duration-150">Біз туралы</a></li>
                         <li><a href="{{ url_for('support') }}" class="hover:text-blue-400 transition duration-150">Контактілер</a></li>
                         <li><a href="#" class="hover:text-blue-400 transition duration-150"></a></li>
                     </ul>
                 </div>
 
-                <!-- 3. Құқықтық -->
+
                 <div>
-                    <h6 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-1">Политика конфиденциальности</h6>
+                    <h4 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-1">Политика конфиденциальности</h4> 
                     <ul class="space-y-2 text-sm text-gray-400">
                         <li><a href="#" class="hover:text-blue-400 transition duration-150"></a></li>
                         <li><a href="#" class="hover:text-blue-400 transition duration-150"></a></li>
@@ -293,12 +280,15 @@
                     </ul>
                 </div>
 
-                <!-- 4. Байланыс -->
                 <div>
                     <h4 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-1">Байланыс</h4>
                     <p class="text-sm text-gray-400">Телефон:<br> 8 771 328 46 65</p>
                     <p class="text-sm text-gray-400">8 708 833 75 12</p>
                 </div>
+            </div>
+            
+            <div class="mt-10 pt-6 border-t border-gray-700 text-center">
+                <p class="text-xs text-gray-500"></p>
             </div>
 
         </div>

@@ -12,14 +12,12 @@
         body { font-family: 'Montserrat', sans-serif; background-color: #f7f9fb; }
         .logo-placeholder { background-color: #2563EB; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 8px; }
         .flash-message { opacity: 1; transition: opacity 0.5s ease-out; }
-        /* Сандық енгізу өрістеріндегі стрелкаларды жасыру */
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
             margin: 0; 
         }
         input[type="number"] { -moz-appearance: textfield; }
-        /* Radio button стилін жақсарту (Жаңа стиль) */
         .form-radio {
             appearance: none;
             border-radius: 50%;
@@ -37,7 +35,6 @@
         .form-radio.text-blue-600:checked { border-color: #2563EB; color: #2563EB; }
         .form-radio.text-gray-600:checked { border-color: #4B5563; color: #4B5563; }
         
-        /* Бұрынғы формадағы инпут стилін жаңарту, себебі бұлар енді қажет емес */
         .old-form-input { 
             display: none; 
         }
@@ -45,7 +42,6 @@
 </head>
 <body>
 
-<!-- NAVIGATSIYALЫҚ ТАҚТА (index.html-дағыдай) -->
 <nav class="bg-white p-4 text-black shadow-sm border-b border-gray-200">
     <div class="container mx-auto px-4 flex justify-between items-center">
         
@@ -81,7 +77,6 @@
     
     <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
         
-        <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div id="flash-container" class="mb-4 space-y-2">
@@ -104,7 +99,6 @@
         
         <form method="POST" action="{{ url_for('payment', order_id=order.id) }}">
             
-            <!-- 🛑 Банкті таңдау блогы -->
             <div class="mb-6 border p-4 rounded-lg bg-gray-50 shadow-inner">
                 <label class="block text-gray-700 font-bold mb-4 text-lg border-b pb-2">Банкті таңдаңыз:</label>
                 <div class="flex flex-col space-y-4">
@@ -123,19 +117,16 @@
                 </div>
             </div>
 
-            <!-- 🛑 Карта нөмірі -->
             <div class="mb-4">
                 <label for="card_number" class="block text-gray-700 font-medium mb-2">Карта нөмірі (16 сан):</label>
                 <input type="number" id="card_number" name="card_number" required maxlength="16" pattern="\d{16}" title="16 саннан тұратын карта нөмірін енгізіңіз" placeholder="XXXX XXXX XXXX XXXX" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner">
             </div>
 
             <div class="flex space-x-4 mb-4">
-                <!-- 🛑 Мерзімі -->
                 <div class="w-1/2">
                     <label for="expiry" class="block text-gray-700 font-medium mb-2">Мерзімі (АА/ЖЖ):</label>
                     <input type="text" id="expiry" name="expiry" required maxlength="5" pattern="(0[1-9]|1[0-2])\/\d{2}" title="Мерзімді MM/YY форматында енгізіңіз (мысалы, 01/25)" placeholder="01/25" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner">
                 </div>
-                <!-- 🛑 CVC -->
                 <div class="w-1/2">
                     <label for="cvc" class="block text-gray-700 font-medium mb-2">CVC/CVV (3 сан):</label>
                     <input type="number" id="cvc" name="cvc" required maxlength="3" pattern="\d{3}" title="Үш саннан тұратын CVC/CVV кодын енгізіңіз" placeholder="123" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner"
@@ -143,7 +134,6 @@
                 </div>
             </div>
             
-            <!-- 🛑 Карта иесінің аты -->
             <div class="mb-6">
                 <label for="card_holder" class="block text-gray-700 font-medium mb-2">Карта иесінің аты-жөні (LATIN):</label>
                 <input type="text" id="card_holder" name="card_holder" required placeholder="JOHN DOE"
@@ -161,7 +151,6 @@
     </div>
 </main>
 <script>
-    // Flash хабарламаларды автоматты жабу
     document.addEventListener('DOMContentLoaded', function() {
         const messages = document.querySelectorAll('.flash-message');
         
@@ -176,14 +165,12 @@
         });
     });
 
-    // CVC өрісінде 3 саннан кейін енгізуді тоқтату
     document.getElementById('cvc').addEventListener('input', function(e) {
         if (e.target.value.length > 3) {
             e.target.value = e.target.value.slice(0, 3);
         }
     });
 
-    // Карта нөмірі өрісінде 16 саннан кейін енгізуді тоқтату
     document.getElementById('card_number').addEventListener('input', function(e) {
         if (e.target.value.length > 16) {
             e.target.value = e.target.value.slice(0, 16);

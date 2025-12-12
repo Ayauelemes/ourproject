@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Әкімші Панелі</title>
-    <!-- MONTSERRAT ҚАРІПІН ЖҮКТЕУ -->
+    <title>Әкімші Панелі</title> 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
@@ -27,12 +26,10 @@
     </style>
 </head>
 <body class="bg-gray-50">
-
-<!-- NAVIGATSIYALЫҚ ТАҚТА (Әкімші режимі) -->
+ 
 <nav class="bg-white p-4 text-black shadow-sm border-b border-gray-200">
     <div class="container mx-auto px-4 flex justify-between items-center">
-        <a href="{{ url_for('index') }}" class="flex items-center">
-            <!-- 🛑 Логотипті A|B деп өзгерттік -->
+        <a href="{{ url_for('index') }}" class="flex items-center"> 
             <div class="logo-placeholder bg-red-600">A|B</div>
             <span class="ml-3 text-xl font-bold text-red-600">Әкімші Панелі</span>
         </a>
@@ -48,8 +45,7 @@
 
 <main class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-extrabold text-gray-900 mb-6">Барлық Тапсырыстар</h1>
-    
-    <!-- Flash Messages -->
+     
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div id="flash-container" class="fixed top-4 right-4 z-50 space-y-2">
@@ -100,8 +96,7 @@
                                 {% endfor %}
                             </ul>
                         </td>
-                        
-                        <!-- Статусты өзгерту формасы -->
+                         
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <form method="POST" action="{{ url_for('admin_update_order', order_id=order.id) }}" class="flex flex-col space-y-2">
                                 <select name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border shadow-sm">
@@ -129,8 +124,7 @@
         </div>
     {% endif %}
 </main>
-<script>
-    // Flash хабарламаларды автоматты жабу
+<script> 
     document.addEventListener('DOMContentLoaded', function() {
         const messages = document.querySelectorAll('.flash-message');
         messages.forEach(function(message) {

@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from extentions import db
-# 🛑 FavoriteItem импорты енді models.py файлында бар болғандықтан, қате болмайды
 from models import User, FOOD_ITEMS, UserOrder, OrderInfo, PaymentInfo, SupportTicket, FavoriteItem
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy import desc, func, distinct, text 
@@ -12,16 +11,16 @@ import json
 from functools import wraps 
 import time 
 
-# ----------------------------------------------------
+
 # 0. Логгер орнату
-# ----------------------------------------------------
+
 logging.basicConfig(level=logging.DEBUG)
 
-# ----------------------------------------------------
-# 1. Flask қосымшасын жасау
-# ----------------------------------------------------
+
+# 1. Flask 
+
 app = Flask(__name__)
-# Бұл жерде DB қосылым деректерін нақты көрсетіңіз:
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'suret_kuipiya_soz_osha_miz_super_secret'
@@ -29,13 +28,11 @@ app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['DEBUG'] = True
 
-# ----------------------------------------------------
-# 2. DB және create_all
-# ----------------------------------------------------
+
 db.init_app(app)
 with app.app_context():
     try:
-        # DB кестелерін жасау (FavoriteItem қоса)
+        
         db.create_all() 
         logging.info("Дерекқор кестелері жасалды")
         
@@ -51,9 +48,9 @@ with app.app_context():
     except Exception as e:
         logging.error(f"Басқа DB қатесі: {e}")
 
-# ----------------------------------------------------
+
 # 3. Flask-Login
-# ----------------------------------------------------
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -67,9 +64,9 @@ def load_user(user_id):
         logging.error(f"User loading error: {e}")
         return None
 
-# ----------------------------------------------------
-# 4. Декоратор: Әкімшіні тексеру
-# ----------------------------------------------------
+
+# 4. admin
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -79,9 +76,9 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# ----------------------------------------------------
-# 5. ДЕРЕКҚОРДЫ ТАЗАЛАУ РОУТЫ (Қатені жою үшін)
-# ----------------------------------------------------
+
+# 5. ДЕРЕКҚОРДЫ ТАЗАЛАУ РОУТЫ 
+
 @app.route('/db_reset')
 def db_reset():
     db.session.rollback() 
@@ -98,9 +95,9 @@ def db_reset():
         
     return redirect(url_for('signup'))
 
-# ----------------------------------------------------
+
 # 6. ТІКЕЛЕЙ ӘКІМШІ КІРУ РОУТЫ
-# ----------------------------------------------------
+
 @app.route('/admin_login')
 def admin_login():
     try:
@@ -128,9 +125,9 @@ def admin_login():
         return redirect(url_for('login'))
 
 
-# ----------------------------------------------------
+
 # 7. Маршруттар
-# ----------------------------------------------------
+
 
 @app.route('/')
 @app.route('/index')
@@ -138,12 +135,12 @@ def index():
     categories = {}
     favorite_item_ids = []
 
-    # Егер қолданушы кірген болса, сүйікті тағамдарды аламыз
+
     if current_user.is_authenticated:
         favorite_item_ids = [fav.food_item_id for fav in current_user.favorite_items.all()]
 
     for item in FOOD_ITEMS:
-        item['is_favorite'] = item['id'] in favorite_item_ids # UI үшін белгі қосу
+        item['is_favorite'] = item['id'] in favorite_item_ids 
         categories.setdefault(item['category'], []).append(item)
     return render_template('index.html', categories=categories)
 
@@ -248,9 +245,8 @@ def dashboard():
     return render_template('dashboard.html', orders=orders, tickets=tickets, favorite_items=favorite_items)
 
 
-# ----------------------------------------------------
-# 🛑 MANY:MANY ҚОСУ/ЖОЮ ЛОГИКАСЫ (FavoriteItem)
-# ----------------------------------------------------
+
+
 @app.route('/toggle_favorite/<int:item_id>', methods=['POST'])
 @login_required
 def toggle_favorite(item_id):
@@ -263,18 +259,18 @@ def toggle_favorite(item_id):
     try:
         db.session.rollback()
         
-        # 2. FavoriteItem кестесінен қатынасты іздеу
+        
         favorite = FavoriteItem.query.filter_by(
             user_id=current_user.id,
             food_item_id=item_id
         ).first()
 
         if favorite:
-            # 3. Егер бар болса, жою
+            
             db.session.delete(favorite)
             flash(f"Тағам сүйіктілер тізімінен жойылды.", 'info')
         else:
-            # 4. Егер жоқ болса, қосу
+            
             new_favorite = FavoriteItem(
                 user_id=current_user.id,
                 food_item_id=item_id
@@ -292,15 +288,13 @@ def toggle_favorite(item_id):
     return redirect(url_for('index'))
 
 
-# ----------------------------------------------------
-# ӘКІМШІЛІК ПАНЕЛЬ (Admin Dashboard)
-# ----------------------------------------------------
+# (Admin Dashboard)
+
 def get_top_selling_items():
     """GROUP BY және COUNT арқылы ең көп сатылған тағамдарды есептейді."""
     try:
         db.session.rollback()
-        # OrderInfo кестесіндегі item_name бойынша топтап, санын (сатылған дана санын) есептейміз
-        # 
+        
         top_items = db.session.query(
             OrderInfo.item_name,
             func.sum(OrderInfo.quantity).label('total_quantity')
@@ -309,7 +303,7 @@ def get_top_selling_items():
          .limit(5) \
          .all()
          
-        # Нәтижелерді сөздік тізіміне түрлендіреміз
+        
         return [{'name': item.item_name, 'quantity': item.total_quantity} for item in top_items]
     except Exception as e:
         logging.error(f"Top selling query failed: {e}")
@@ -325,10 +319,10 @@ def admin_dashboard():
     tickets = SupportTicket.query.filter_by(status='Жаңа').order_by(desc(SupportTicket.timestamp)).all()
     ticket_statuses = ['Жаңа', 'Қаралуда', 'Жауап күтуде', 'Жабық']
     
-    # 🛑 Агрегатталған есептілік (GROUP BY)
+    # (GROUP BY)
     top_selling = get_top_selling_items()
 
-    # 🛑 Автоматтандыру сценарийі туралы ақпарат
+    
     backup_info = {
         'status': 'Қажетті сценарийлер бар',
         'details': [
@@ -344,7 +338,7 @@ def admin_dashboard():
         statuses=statuses, 
         tickets=tickets, 
         ticket_statuses=ticket_statuses,
-        top_selling=top_selling, # Ең танымал тағамдар есебі
+        top_selling=top_selling, 
         backup_info=backup_info
     )
 
@@ -383,9 +377,9 @@ def admin_update_ticket(ticket_id):
     return redirect(url_for('admin_dashboard'))
 
 
-# ----------------------------------------------------
-# Себет логикасы
-# ----------------------------------------------------
+
+# Себет 
+
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
     if 'cart' not in session:
@@ -434,9 +428,8 @@ def remove_from_cart(item_id):
         
     return redirect(url_for('checkout'))
 
-# ----------------------------------------------------
-# Checkout Роуты
-# ----------------------------------------------------
+
+# Checkout 
 @app.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
@@ -512,9 +505,8 @@ def checkout():
         service_fee=service_fee 
     )
 
-# ----------------------------------------------------
-# Төлем Роуттары
-# ----------------------------------------------------
+
+# Төлем 
 @app.route('/payment/<int:order_id>', methods=['GET', 'POST'])
 @login_required
 def payment(order_id):
@@ -567,9 +559,9 @@ def order_accepted(order_id):
     order = UserOrder.query.get_or_404(order_id)
     return render_template('order_accepted.html', order=order)
 
-# ----------------------------------------------------
-# ҚОЛДАУ РОУТЫ (Support Ticket)
-# ----------------------------------------------------
+
+#(Support Ticket)
+
 @app.route('/support', methods=['GET', 'POST'])
 def support():
     if request.method == 'POST':
@@ -628,34 +620,33 @@ def api_chat():
     
     if not user_query:
         return jsonify({'response': 'Сұрағыңызды енгізіңіз.'}), 400
-
-    # ------------------------------------------------------
-    # 🛑 Енді көбірек сұрақтарға жауап береді
-    # ------------------------------------------------------
     
-    # 1. Сәлемдесу және қоштасу
+    
+    
+    
+    
     if 'сәлем' in user_query or 'здравствуйте' in user_query or 'хелло' in user_query:
         response_text = "Сәлеметсіз бе! Мен A|B тағам жеткізу қызметінің AI ассистентімін. Сізге қалай көмектесе аламын?"
     elif 'сау бол' in user_query or 'кош бол' in user_query:
         response_text = "Келіңіз, көріңіз, рахмет! Әрқашан қуаныштымыз. Күніңіз сәтті өтсін!"
     
-    # 2. Жеткізу және уақыт
+    
     elif 'жеткізу' in user_query or 'уақыт' in user_query or 'қашан' in user_query:
         response_text = "Жеткізу уақыты әдетте тапсырыс берілген сәттен бастап 45-60 минут аралығын алады. Тапсырысты Жеке Кабинетте бақылай аласыз."
 
-    # 3. Тапсырыс беру және себет
+    
     elif 'тапсырыс беру' in user_query or 'қалай тапсырыс' in user_query or 'себет' in user_query:
         response_text = "Тапсырыс беру өте оңай: 1. Басты беттегі тағамдарды таңдап, Себетке қосыңыз. 2. Себет белгішесін басып, тапсырысты растау бетіне өтіңіз. 3. Мекенжайды енгізіп, төлем әдісін таңдаңыз."
         
-    # 4. Төлем әдістері
+    
     elif 'төлем' in user_query or 'төлеймін' in user_query or 'карта' in user_query:
         response_text = "Біз Картамен (онлайн төлем) және Қолма-қол ақшамен төлеуді қабылдаймыз. Төлем әдісін Тапсырысты Растау кезінде таңдай аласыз."
     
-    # 5. Тағамдар және мәзір
+    
     elif 'тағам' in user_query or 'мәзір' in user_query or 'пицца' in user_query or 'суши' in user_query:
         response_text = "Біздің мәзірде суши сеттер, роллдар, пицца, бургерлер, ыстық тағамдар және тәттілер бар. Басты беттегі категориялар арқылы қажетті тағамды оңай таба аласыз."
         
-    # 6. Егер ештеңе сәйкес келмесе
+    
     else:
         response_text = "Сіздің сұрағыңызды түсінбедім. Нақты ақпарат алу үшін біздің қолдау қызметіне (жоғарыдағы форма арқылы) хабарласыңыз."
 
@@ -664,9 +655,9 @@ def api_chat():
     return jsonify({'response': response_text}), 200
 
 
-# ----------------------------------------------------
+
 # Бағдарламаны іске қосу
-# ----------------------------------------------------
+
 if __name__ == '__main__':
-    # Flask-ты барлық желілерде қолжетімді ету
+    
     app.run(debug=True, host='0.0.0.0', port=5001)

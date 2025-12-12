@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship 
 from sqlalchemy import func, UniqueConstraint, event, PrimaryKeyConstraint 
 
-# 🛑 МӘЗІР ТІЗІМІ: Енді бұл тізім models.py-да тұрады және app.py-да қолданылады.
+# МӘЗІР ТІЗІМІ
 FOOD_ITEMS = [
     { "id": 1, "name": "Сет 1", "description": "Классикалық суши сеті.", "price": 9500, "image_url": "images/set1.jpeg", "category": "Сеттер" }, 
     { "id": 2, "name": "Сет 2", "description": "Жапондық ең танымал роллдар.", "price": 10500, "image_url": "images/set2.jpeg", "category": "Сеттер" },
@@ -110,14 +110,13 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f'<User {self.username}>'
 
-# 🛑 ЖАҢА АРАЛЫҚ КЕСТЕ: Many:Many (User ↔ FoodItem)
-# Бұл кесте тек пайдаланушының сүйікті тағамдарының ID-терін сақтайды.
+
 class FavoriteItem(db.Model):
     __tablename__ = 'favorite_items'
     
-    # Біріккен бастапқы кілт - екі кілттің қосындысы
+    
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    # food_item_id - FoodItem кестесі жоқ болғандықтан, тек ID-ні сақтаймыз
+    
     food_item_id = db.Column(db.Integer, nullable=False) 
     
     __table_args__ = (
